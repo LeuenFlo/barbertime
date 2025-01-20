@@ -177,10 +177,8 @@ section {
 // CTA Section
 .cta-section {
   position: relative;
+  padding: 6rem 0;
   color: white;
-  padding: 4rem 2rem;
-  border-radius: 8px;
-  margin-bottom: 2rem;
   overflow: hidden;
 
   .cta-background {
@@ -212,17 +210,24 @@ section {
   .cta-content {
     position: relative;
     z-index: 3;
-  }
+    max-width: 800px;
+    margin: 0 auto;
 
-  h2 {
-    font-size: 2rem;
-    margin-bottom: 1rem;
-  }
+    h2 {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+    }
 
-  p {
-    font-size: 1.1rem;
-    margin-bottom: 2rem;
-    opacity: 0.9;
+    p {
+      font-size: 1.2rem;
+      margin-bottom: 2rem;
+      opacity: 0.9;
+    }
+
+    .btn-lg {
+      padding: 1rem 2rem;
+      font-size: 1.1rem;
+    }
   }
 }
 
