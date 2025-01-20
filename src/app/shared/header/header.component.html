@@ -1,12 +1,46 @@
-<header class="header">
+<header class="header" [class.nav-open]="isMenuOpen">
   <div class="container">
     <a routerLink="/" class="logo">BarberTime</a>
+    
+    <button class="menu-toggle" (click)="toggleMenu()" aria-label="Toggle Menu">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+
     <nav class="nav">
-      <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">Home</a>
-      <a routerLink="/services" routerLinkActive="active">Services</a>
-      <a routerLink="/about" routerLinkActive="active">Über uns</a>
-      <a routerLink="/contact" routerLinkActive="active">Kontakt</a>
-      <a routerLink="/booking" routerLinkActive="active" class="booking-btn">Termin buchen</a>
+      <a routerLink="/" 
+         routerLinkActive="active" 
+         [routerLinkActiveOptions]="{exact: true}"
+         (click)="closeMenu()">
+        <i class="fas fa-home"></i>
+        <span>Home</span>
+      </a>
+      <a routerLink="/services" 
+         routerLinkActive="active"
+         (click)="closeMenu()">
+        <i class="fas fa-cut"></i>
+        <span>Services</span>
+      </a>
+      <a routerLink="/about" 
+         routerLinkActive="active"
+         (click)="closeMenu()">
+        <i class="fas fa-info-circle"></i>
+        <span>Über uns</span>
+      </a>
+      <a routerLink="/contact" 
+         routerLinkActive="active"
+         (click)="closeMenu()">
+        <i class="fas fa-envelope"></i>
+        <span>Kontakt</span>
+      </a>
+      <a routerLink="/booking" 
+         routerLinkActive="active" 
+         class="booking-btn"
+         (click)="closeMenu()">
+        <i class="fas fa-calendar-alt"></i>
+        <span>Termin buchen</span>
+      </a>
     </nav>
   </div>
 </header>

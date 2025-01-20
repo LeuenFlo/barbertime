@@ -6,8 +6,18 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
   standalone: true,
   imports: [RouterLink, RouterLinkActive],
   templateUrl: './header.component.html',
-  styleUrl: './header.component.scss'
+  styleUrls: ['./header.component.scss']
 })
 export class HeaderComponent {
+  isMenuOpen = false;
 
+  toggleMenu(): void {
+    this.isMenuOpen = !this.isMenuOpen;
+    document.body.style.overflow = this.isMenuOpen ? 'hidden' : '';
+  }
+
+  closeMenu(): void {
+    this.isMenuOpen = false;
+    document.body.style.overflow = '';
+  }
 }
