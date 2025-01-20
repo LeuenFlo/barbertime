@@ -1,1 +1,91 @@
 /* You can add global styles to this file, and also import other style files */
+
+/* Google Fonts Import */
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Poppins:wght@300;400;500;600&display=swap');
+/* Font Awesome Import */
+@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css');
+
+/* Reset and Base Styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Poppins', sans-serif;
+  line-height: 1.6;
+  color: #333;
+  background-color: #f9f9f9;
+}
+
+/* Container */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+/* Main Content Padding (for fixed header) */
+.main-content {
+  padding-top: 80px; /* Adjust based on header height */
+  min-height: calc(100vh - 80px);
+}
+
+/* Utility Classes */
+.text-center {
+  text-align: center;
+}
+
+.section-padding {
+  padding: 4rem 0;
+}
+
+/* Buttons */
+.btn {
+  display: inline-block;
+  padding: 0.8rem 1.5rem;
+  border-radius: 4px;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+}
+
+.btn-primary {
+  background-color: #9f6b3f;
+  color: white;
+
+  &:hover {
+    background-color: #825632;
+  }
+}
+
+.btn-outline {
+  border: 2px solid #9f6b3f;
+  color: #9f6b3f;
+  background-color: transparent;
+
+  &:hover {
+    background-color: #9f6b3f;
+    color: white;
+  }
+}
+
+/* Headings */
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Playfair Display', serif;
+  margin-bottom: 1rem;
+}
+
+/* Links */
+a {
+  color: #9f6b3f;
+  text-decoration: none;
+  transition: color 0.3s ease;
+
+  &:hover {
+    color: #825632;
+  }
+}
