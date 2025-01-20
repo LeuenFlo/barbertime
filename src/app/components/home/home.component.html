@@ -18,17 +18,20 @@
         <div class="service-card">
           <i class="fas fa-cut"></i>
           <h3>Haarschnitt</h3>
-          <p>Professionelle Haarschnitte nach Ihren Wünschen</p>
+          <p>Professionelle Haarschnitte nach Ihren Wünschen, von klassisch bis modern</p>
+          <a routerLink="/services" class="btn btn-outline-secondary">Details & Preise</a>
         </div>
         <div class="service-card">
           <i class="fas fa-razor"></i>
           <h3>Bartpflege</h3>
-          <p>Traditionelle Rasur und Bartpflege</p>
+          <p>Traditionelle Rasur und individuelle Bartgestaltung für jeden Stil</p>
+          <a routerLink="/services" class="btn btn-outline-secondary">Details & Preise</a>
         </div>
         <div class="service-card">
           <i class="fas fa-spray-can"></i>
           <h3>Styling</h3>
-          <p>Moderne Styling-Techniken für jeden Look</p>
+          <p>Moderne Styling-Techniken und Trends wie Taper Fade, Low Fade und Mid Fade</p>
+          <a routerLink="/services" class="btn btn-outline-secondary">Details & Preise</a>
         </div>
       </div>
     </div>
@@ -40,12 +43,42 @@
       <div class="about-content">
         <div class="about-text">
           <h2>Über BarberTime</h2>
-          <p>Seit 2020 bieten wir erstklassige Barbier-Dienstleistungen in Musterstadt. Unser erfahrenes Team verbindet traditionelles Handwerk mit modernen Techniken.</p>
+          <p>Seit März 2024 bieten wir erstklassige Barbier-Dienstleistungen in Grosshöchstetten. Mit Leidenschaft und Präzision sorgen wir für Ihren perfekten Look. Unser erfahrenes Team verbindet traditionelles Handwerk mit modernen Techniken.</p>
+          <div class="about-highlights">
+            <div class="highlight">
+              <i class="fas fa-clock"></i>
+              <p>Mo-Fr: 9:00-20:00<br>Sa: 9:00-18:00</p>
+            </div>
+            <a href="https://maps.google.com/?q=Bahnhofstrasse+1,+3506+Grosshöchstetten" 
+                   target="_blank" 
+                   rel="noopener noreferrer">
+                <div class="highlight">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <p>
+                    Bahnhofstrasse 1<br>3506 Grosshöchstetten
+                    </p>
+                </div>
+            </a>
+          </div>
           <a routerLink="/about" class="btn btn-outline">Mehr erfahren</a>
         </div>
         <div class="about-image">
-          <img src="assets/images/shop_von_aussen.webp" alt="BarberTime Shop Interior">
+          <img src="assets/images/shop_von_aussen.webp" alt="BarberTime Shop Außenansicht">
         </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="cta-section text-center">
+    <div class="cta-background">
+      <img src="assets/images/wallpaper.webp" alt="Background">
+    </div>
+    <div class="container">
+      <div class="cta-content">
+        <h2>Bereit für Ihren neuen Look?</h2>
+        <p>Vereinbaren Sie einen Termin und erleben Sie professionelle Haar- und Bartpflege.</p>
+        <a routerLink="/booking" class="btn btn-primary btn-lg">Jetzt Termin buchen</a>
       </div>
     </div>
   </section>
