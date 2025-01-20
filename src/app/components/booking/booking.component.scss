@@ -1,0 +1,152 @@
+// Variables
+$primary-color: #9f6b3f;
+$text-color: #333;
+$light-bg: #f5f5f5;
+
+// Common Styles
+.section-padding {
+  padding: 5rem 0;
+
+  @media (max-width: 768px) {
+    padding: 3rem 0;
+  }
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
+// Booking Header
+.booking-header {
+  background-color: $light-bg;
+  text-align: center;
+
+  h1 {
+    font-size: 2.5rem;
+    color: $text-color;
+    margin-bottom: 1rem;
+  }
+
+  p {
+    font-size: 1.2rem;
+    color: #666;
+  }
+}
+
+// Booking Content
+.booking-content {
+  background-color: white;
+}
+
+.contact-card {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  padding: 3rem;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4rem;
+  align-items: start;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+    padding: 1.5rem;
+  }
+}
+
+.contact-info {
+  display: grid;
+  gap: 2rem;
+}
+
+.info-item {
+  text-align: center;
+  padding: 2rem;
+  background: $light-bg;
+  border-radius: 8px;
+  transition: transform 0.3s ease;
+
+  &:hover {
+    transform: translateY(-5px);
+  }
+
+  i {
+    font-size: 2rem;
+    color: $primary-color;
+    margin-bottom: 1rem;
+  }
+
+  h3 {
+    font-size: 1.2rem;
+    color: $text-color;
+    margin-bottom: 1rem;
+  }
+
+  p {
+    color: #666;
+    margin: 0;
+    line-height: 1.6;
+
+    a {
+      color: inherit;
+      text-decoration: none;
+      transition: color 0.3s ease;
+
+      &:hover {
+        color: $primary-color;
+      }
+    }
+  }
+}
+
+.booking-note {
+  h2 {
+    font-size: 1.8rem;
+    color: $text-color;
+    margin-bottom: 1.5rem;
+  }
+
+  ul {
+    list-style: none;
+    padding: 0;
+    margin-bottom: 2rem;
+    counter-reset: item;
+
+    li {
+      color: #666;
+      margin-bottom: 1rem;
+      padding-left: 2rem;
+      position: relative;
+      line-height: 1.6;
+
+      &::before {
+        content: counter(item) ".";
+        counter-increment: item;
+        position: absolute;
+        left: 0;
+        color: $primary-color;
+        font-weight: bold;
+      }
+
+      strong {
+        color: $primary-color;
+      }
+    }
+  }
+
+  .note {
+    background: $light-bg;
+    padding: 1.5rem;
+    border-radius: 8px;
+    color: #666;
+    line-height: 1.6;
+
+    i {
+      color: $primary-color;
+      margin-right: 0.5rem;
+    }
+  }
+}
