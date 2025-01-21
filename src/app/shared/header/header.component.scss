@@ -1,7 +1,7 @@
 // Variables
 $primary-color: #9f6b3f;
 $text-color: #333;
-$header-height: 70px;
+$header-height: 80px;
 $mobile-breakpoint: 768px;
 
 // Header Base
@@ -31,16 +31,20 @@ $mobile-breakpoint: 768px;
 
 // Logo
 .logo {
-  font-size: 1.8rem;
-  font-weight: bold;
-  color: $text-color;
+  display: flex;
+  align-items: center;
   text-decoration: none;
-  font-family: 'Playfair Display', serif;
   z-index: 1001;
-  transition: color 0.3s ease;
+  transition: transform 0.3s ease;
+
+  img {
+    height: 60px;
+    width: auto;
+    border-radius: 4px;
+  }
 
   &:hover {
-    color: $primary-color;
+    transform: scale(1.02);
   }
 }
 
