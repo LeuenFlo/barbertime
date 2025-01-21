@@ -1,0 +1,44 @@
+<div class="shop-container">
+    <div class="shop-header">
+        <h1>Unsere Produkte</h1>
+        <p class="availability-notice">Alle Produkte sind exklusiv in unserem Salon erhältlich.</p>
+        <div class="search-container">
+            <input 
+                type="text" 
+                class="search-input" 
+                placeholder="Produkte suchen..." 
+                [ngModel]="searchTerm"
+                (ngModelChange)="onSearch($event)"
+            >
+            <span class="material-icons search-icon">search</span>
+            @if (searchTerm) {
+                <button class="clear-button" (click)="clearSearch()">
+                    <span class="material-icons">close</span>
+                </button>
+            }
+        </div>
+    </div>
+
+    <div class="categories">
+        <button class="category-btn" [class.active]="selectedCategory === 'all'" (click)="filterProducts('all')">Alle</button>
+        <button class="category-btn" [class.active]="selectedCategory === 'tools'" (click)="filterProducts('tools')">Werkzeuge</button>
+        <button class="category-btn" [class.active]="selectedCategory === 'beard'" (click)="filterProducts('beard')">Bartpflege</button>
+        <button class="category-btn" [class.active]="selectedCategory === 'hair'" (click)="filterProducts('hair')">Haarpflege</button>
+        <button class="category-btn" [class.active]="selectedCategory === 'styling'" (click)="filterProducts('styling')">Styling</button>
+    </div>
+
+    <div class="products-grid">
+        @for (product of filteredProducts; track product.id) {
+            <div class="product-card">
+                <div class="product-icon">
+                    <span class="material-icons">{{ product.icon }}</span>
+                </div>
+                <div class="product-info">
+                    <h3>{{ product.name }}</h3>
+                    <p class="product-description">{{ product.description }}</p>
+                    <p class="product-price">{{ product.price | chf }}</p>
+                </div>
+            </div>
+        }
+    </div>
+</div>
