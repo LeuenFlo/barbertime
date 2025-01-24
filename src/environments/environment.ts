@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  pocketbaseUrl: 'http://0.0.0.0:8090'
+  pocketbaseUrl: 'http://217.160.252.61:80'
 };
