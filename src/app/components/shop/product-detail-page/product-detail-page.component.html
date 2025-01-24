@@ -1,0 +1,57 @@
+@if (product) {
+  <div class="product-page">
+    <div class="back-button">
+      <a routerLink="/shop" class="back-link">
+        <span class="material-icons">arrow_back</span>
+        Zurück zum Shop
+      </a>
+    </div>
+
+    <div class="product-content">
+      <div class="product-gallery">
+        <div class="product-image">
+          <img *ngIf="product.images?.length" [src]="product.images[currentImageIndex]" [alt]="product.title">
+          <span *ngIf="!product.images?.length" class="material-icons">image</span>
+          
+          @if (hasMultipleImages()) {
+            <button class="nav-btn prev" [class.hidden]="!canShowPrevious()" (click)="previousImage()">
+              <span class="material-icons">chevron_left</span>
+            </button>
+            <button class="nav-btn next" [class.hidden]="!canShowNext()" (click)="nextImage()">
+              <span class="material-icons">chevron_right</span>
+            </button>
+          }
+        </div>
+
+        @if (hasMultipleImages()) {
+          <div class="thumbnail-container">
+            @for (image of product.images; track $index) {
+              <div 
+                class="thumbnail" 
+                [class.active]="currentImageIndex === $index"
+                (click)="currentImageIndex = $index"
+              >
+                <img [src]="image" [alt]="product.title + ' thumbnail'">
+              </div>
+            }
+          </div>
+        }
+      </div>
+
+      <div class="product-info">
+        <h1>{{ product.title }}</h1>
+        <p class="description">{{ product.description }}</p>
+        <p class="price">{{ product.price | chf }}</p>
+        <p class="availability">
+          <span class="material-icons">store</span>
+          Dieses Produkt ist ausschliesslich in unserem Salon erhältlich
+        </p>
+      </div>
+    </div>
+  </div>
+} @else {
+  <div class="loading">
+    <span class="material-icons">hourglass_empty</span>
+    <p>Produkt wird geladen...</p>
+  </div>
+} 

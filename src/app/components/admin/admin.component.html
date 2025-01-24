@@ -1,0 +1,119 @@
+<div class="admin-container">
+  @if (!(isLoggedIn$ | async)) {
+    <div class="login-form">
+      <h2>Admin Login</h2>
+      <form (ngSubmit)="onLogin()">
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input 
+            type="email" 
+            id="email" 
+            [(ngModel)]="credentials.email" 
+            name="email" 
+            required
+          >
+        </div>
+        <div class="form-group">
+          <label for="password">Passwort</label>
+          <input 
+            type="password" 
+            id="password" 
+            [(ngModel)]="credentials.password" 
+            name="password" 
+            required
+          >
+        </div>
+        <button type="submit">Login</button>
+      </form>
+    </div>
+  } @else {
+    <div class="admin-panel">
+      <div class="header">
+        <h2>Produkt-Verwaltung</h2>
+        <button class="logout-btn" (click)="onLogout()">Logout</button>
+      </div>
+
+      <!-- Neues Produkt hinzufügen -->
+      @if (!editingProduct) {
+        <div class="add-product-form">
+          <h3>Neues Produkt hinzufügen</h3>
+          <form (ngSubmit)="onAddProduct()">
+            <div class="form-group">
+              <label for="title">Name</label>
+              <input type="text" id="title" [(ngModel)]="newProduct.title" name="title" required>
+            </div>
+            <div class="form-group">
+              <label for="description">Beschreibung</label>
+              <textarea id="description" [(ngModel)]="newProduct.description" name="description" required></textarea>
+            </div>
+            <div class="form-group">
+              <label for="price">Preis</label>
+              <input type="number" id="price" [(ngModel)]="newProduct.price" name="price" step="0.01" required>
+            </div>
+            <div class="form-group">
+              <label for="image">Bild</label>
+              <input type="file" id="image" (change)="onFileSelected($event)" accept="image/*">
+            </div>
+            <button type="submit">Produkt hinzufügen</button>
+          </form>
+        </div>
+      }
+
+      <!-- Produkt bearbeiten -->
+      @if (editingProduct) {
+        <div class="edit-product-form">
+          <h3>Produkt bearbeiten</h3>
+          <form (ngSubmit)="onUpdateProduct()">
+            <div class="form-group">
+              <label for="edit-title">Name</label>
+              <input type="text" id="edit-title" [(ngModel)]="editingProduct.title" name="title" required>
+            </div>
+            <div class="form-group">
+              <label for="edit-description">Beschreibung</label>
+              <textarea id="edit-description" [(ngModel)]="editingProduct.description" name="description" required></textarea>
+            </div>
+            <div class="form-group">
+              <label for="edit-price">Preis</label>
+              <input type="number" id="edit-price" [(ngModel)]="editingProduct.price" name="price" step="0.01" required>
+            </div>
+            <div class="form-group">
+              <label for="edit-image">Neues Bild (optional)</label>
+              <input type="file" id="edit-image" (change)="onFileSelected($event)" accept="image/*">
+            </div>
+            <div class="button-group">
+              <button type="submit">Speichern</button>
+              <button type="button" class="cancel-btn" (click)="cancelEditing()">Abbrechen</button>
+            </div>
+          </form>
+        </div>
+      }
+
+      <!-- Produktliste -->
+      <div class="products-list">
+        <h3>Produkte</h3>
+        <div class="products-grid">
+          @for (product of products; track product.id) {
+            <div class="product-card">
+              <div class="product-image">
+                @if (product.images.length) {
+                  <img [src]="product.images[0]" [alt]="product.title">
+                } @else {
+                  <span class="material-icons">image</span>
+                }
+              </div>
+              <div class="product-info">
+                <h4>{{ product.title }}</h4>
+                <p>{{ product.description }}</p>
+                <p class="price">{{ product.price | chf }}</p>
+                <div class="actions">
+                  <button (click)="startEditing(product)">Bearbeiten</button>
+                  <button class="delete-btn" (click)="onDeleteProduct(product.id)">Löschen</button>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  }
+</div>

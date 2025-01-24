@@ -29,16 +29,17 @@
 
     <div class="products-grid">
         @for (product of filteredProducts; track product.id) {
-            <div class="product-card">
-                <div class="product-icon">
-                    <span class="material-icons">{{ product.icon }}</span>
+            <a [routerLink]="['/shop/product', product.id]" class="product-card">
+                <div class="product-image">
+                    <img *ngIf="product.images.length" [src]="product.images[0]" [alt]="product.title">
+                    <span *ngIf="!product.images.length" class="material-icons">image</span>
                 </div>
                 <div class="product-info">
-                    <h3>{{ product.name }}</h3>
-                    <p class="product-description">{{ product.description }}</p>
+                    <h3>{{ product.title }}</h3>
+                    <p class="product-description">{{ product.description | truncate:100 }}</p>
                     <p class="product-price">{{ product.price | chf }}</p>
                 </div>
-            </div>
+            </a>
         }
     </div>
 </div>

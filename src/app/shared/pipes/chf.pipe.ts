@@ -7,6 +7,6 @@ import { Pipe, PipeTransform } from '@angular/core';
 export class ChfPipe implements PipeTransform {
   transform(value: number): string {
     const hasNonZeroDecimals = value % 1 !== 0;
-    return `${hasNonZeroDecimals ? value.toFixed(2) : Math.floor(value)} .-`;
+    return `${hasNonZeroDecimals ? value.toFixed(2) : Math.floor(value)} CHF`;
   }
 } 

@@ -4,6 +4,8 @@ $text-color: #333;
 $header-height: 80px;
 $mobile-breakpoint: 768px;
 
+@use "sass:color";
+
 // Header Base
 .header {
   background-color: #ffffff;
@@ -110,13 +112,13 @@ $mobile-breakpoint: 768px;
     }
 
     &:hover {
-      background-color: darken($primary-color, 10%);
+      background-color: color.adjust($primary-color, $lightness: -10%);
       transform: translateY(-2px);
       color: white;
     }
 
     &.active {
-      background-color: darken($primary-color, 15%);
+      background-color: color.adjust($primary-color, $lightness: -15%);
       color: white;
     }
   }
