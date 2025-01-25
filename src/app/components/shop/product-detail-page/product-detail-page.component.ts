@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { PocketBaseService, Product } from '../../../services/pocketbase.service';
@@ -11,8 +11,11 @@ import { ChfPipe } from '../../../shared/pipes/chf.pipe';
   templateUrl: './product-detail-page.component.html',
   styleUrls: ['./product-detail-page.component.scss']
 })
-export class ProductDetailPageComponent implements OnInit {
-  product?: Product;
+export class ProductDetailPageComponent implements OnInit, OnDestroy {
+  product: Product | null = null;
+  isLoading = false;
+  showLoading = false;
+  private loadingTimeout: any;
   currentImageIndex = 0;
 
   constructor(
@@ -21,11 +24,40 @@ export class ProductDetailPageComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    const productId = this.route.snapshot.paramMap.get('id');
-    if (productId) {
-      this.pocketBaseService.getProduct(productId).subscribe(
-        product => this.product = product
-      );
+    this.route.params.subscribe(params => {
+      this.loadProduct(params['id']);
+    });
+  }
+
+  private loadProduct(id: string) {
+    this.isLoading = true;
+    
+    // Start a timer to show loading after 300ms
+    this.loadingTimeout = setTimeout(() => {
+      if (this.isLoading) {
+        this.showLoading = true;
+      }
+    }, 300);
+
+    this.pocketBaseService.getProduct(id).subscribe({
+      next: (product) => {
+        this.product = product;
+        this.isLoading = false;
+        this.showLoading = false;
+        clearTimeout(this.loadingTimeout);
+      },
+      error: (error) => {
+        console.error('Error loading product:', error);
+        this.isLoading = false;
+        this.showLoading = false;
+        clearTimeout(this.loadingTimeout);
+      }
+    });
+  }
+
+  ngOnDestroy() {
+    if (this.loadingTimeout) {
+      clearTimeout(this.loadingTimeout);
     }
   }
 

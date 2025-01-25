@@ -16,16 +16,24 @@ import { PocketBaseService, Product } from '../../services/pocketbase.service';
   styleUrls: ['./shop.component.scss']
 })
 export class ShopComponent implements OnInit, OnDestroy {
-  selectedCategory: 'all' | 'tools' | 'beard' | 'hair' | 'styling' = 'all';
+  selectedCategory: Product['category'] | null = null;
   searchTerm = '';
   products: Product[] = [];
   filteredProducts: Product[] = [];
   currentPage = 1;
-  totalPages = 0;
+  totalPages = 1;
   totalItems = 0;
   itemsPerPage = 12;
+  isLoading = false;
   private searchSubject = new Subject<string>();
   private subscriptions: Subscription[] = [];
+
+  readonly categories = [
+    { value: 'tools', label: 'Werkzeuge' },
+    { value: 'beard', label: 'Bartpflege' },
+    { value: 'hair', label: 'Haarpflege' },
+    { value: 'styling', label: 'Styling' }
+  ];
 
   constructor(
     private pocketBaseService: PocketBaseService
@@ -67,60 +75,52 @@ export class ShopComponent implements OnInit, OnDestroy {
   }
 
   private loadProducts() {
-    const subscription = this.pocketBaseService.getProducts(this.currentPage, this.itemsPerPage)
-      .subscribe(response => {
-        this.products = response.items;
-        this.filteredProducts = this.filterByCategory(response.items);
-        this.totalPages = response.totalPages;
-        this.totalItems = response.totalItems;
-      });
+    this.isLoading = true;
     
-    this.subscriptions.push(subscription);
-  }
-
-  private filterByCategory(products: Product[]): Product[] {
-    if (this.selectedCategory === 'all') {
-      return products;
-    }
-    return products.filter(product => product.category === this.selectedCategory);
-  }
-
-  filterProducts(category: 'all' | 'tools' | 'beard' | 'hair' | 'styling'): void {
-    this.selectedCategory = category;
-    this.currentPage = 1;
-    if (category === 'all') {
-      if (this.searchTerm) {
-        this.searchSubject.next(this.searchTerm);
-      } else {
-        this.loadProducts();
-      }
-    } else {
-      const subscription = this.pocketBaseService.getProductsByCategory(category, this.currentPage, this.itemsPerPage)
+    if (this.selectedCategory) {
+      this.pocketBaseService.getProductsByCategory(this.selectedCategory, this.currentPage, this.itemsPerPage)
         .subscribe(response => {
           this.products = response.items;
           this.filteredProducts = response.items;
           this.totalPages = response.totalPages;
           this.totalItems = response.totalItems;
+          this.isLoading = false;
         });
-      this.subscriptions.push(subscription);
+    } else if (this.searchTerm) {
+      this.pocketBaseService.searchProducts(this.searchTerm, this.currentPage, this.itemsPerPage)
+        .subscribe(response => {
+          this.products = response.items;
+          this.filteredProducts = this.filterByCategory(response.items);
+          this.totalPages = response.totalPages;
+          this.totalItems = response.totalItems;
+          this.isLoading = false;
+        });
+    } else {
+      this.pocketBaseService.getProducts(this.currentPage, this.itemsPerPage)
+        .subscribe(response => {
+          this.products = response.items;
+          this.filteredProducts = this.filterByCategory(response.items);
+          this.totalPages = response.totalPages;
+          this.totalItems = response.totalItems;
+          this.isLoading = false;
+        });
     }
+  }
+
+  private filterByCategory(products: Product[]): Product[] {
+    if (!this.selectedCategory) return products;
+    return products.filter(product => product.category === this.selectedCategory);
+  }
+
+  filterProducts(category: Product['category'] | null): void {
+    this.selectedCategory = category;
+    this.currentPage = 1;
+    this.searchTerm = '';
+    this.loadProducts();
   }
 
   loadPage(page: number): void {
     this.currentPage = page;
-    if (this.searchTerm) {
-      this.searchSubject.next(this.searchTerm);
-    } else if (this.selectedCategory !== 'all') {
-      const subscription = this.pocketBaseService.getProductsByCategory(this.selectedCategory, this.currentPage, this.itemsPerPage)
-        .subscribe(response => {
-          this.products = response.items;
-          this.filteredProducts = response.items;
-          this.totalPages = response.totalPages;
-          this.totalItems = response.totalItems;
-        });
-      this.subscriptions.push(subscription);
-    } else {
-      this.loadProducts();
-    }
+    this.loadProducts();
   }
 }

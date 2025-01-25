@@ -23,70 +23,116 @@
             required
           >
         </div>
-        <button type="submit">Login</button>
+        <button type="submit" class="login-button">Anmelden</button>
       </form>
     </div>
   } @else {
     <div class="admin-panel">
       <div class="header">
-        <h2>Produkt-Verwaltung</h2>
+        <h2>Admin Panel</h2>
         <button class="logout-btn" (click)="onLogout()">Logout</button>
       </div>
 
       <!-- Neues Produkt hinzufügen -->
-      @if (!editingProduct) {
-        <div class="add-product-form">
-          <h3>Neues Produkt hinzufügen</h3>
-          <form (ngSubmit)="onAddProduct()">
+      <div class="add-product-form">
+        <h3>Neues Produkt hinzufügen</h3>
+        <form (ngSubmit)="onAddProduct()">
+          <div class="form-row">
             <div class="form-group">
-              <label for="title">Name</label>
-              <input type="text" id="title" [(ngModel)]="newProduct.title" name="title" required>
+              <label for="title">Titel</label>
+              <input 
+                type="text" 
+                id="title" 
+                [(ngModel)]="newProduct.title" 
+                name="title" 
+                required
+                placeholder="z.B. Eleganter Klapptisch"
+              >
             </div>
-            <div class="form-group">
-              <label for="description">Beschreibung</label>
-              <textarea id="description" [(ngModel)]="newProduct.description" name="description" required></textarea>
+            <div class="form-group-row">
+              <div class="form-group">
+                <label for="category">Kategorie</label>
+                <select 
+                  id="category" 
+                  [(ngModel)]="newProduct.category" 
+                  name="category" 
+                  required
+                >
+                  <option value="" disabled selected>Bitte wählen...</option>
+                  <option value="tools">Werkzeuge</option>
+                  <option value="beard">Bartpflege</option>
+                  <option value="hair">Haarpflege</option>
+                  <option value="styling">Styling</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="price">Preis (CHF)</label>
+                <input 
+                  type="number" 
+                  id="price" 
+                  [(ngModel)]="newProduct.price" 
+                  name="price" 
+                  required
+                  step="0.01"
+                  min="0"
+                >
+              </div>
             </div>
-            <div class="form-group">
-              <label for="price">Preis</label>
-              <input type="number" id="price" [(ngModel)]="newProduct.price" name="price" step="0.01" required>
-            </div>
-            <div class="form-group">
-              <label for="image">Bild</label>
-              <input type="file" id="image" (change)="onFileSelected($event)" accept="image/*">
-            </div>
-            <button type="submit">Produkt hinzufügen</button>
-          </form>
-        </div>
-      }
+          </div>
 
-      <!-- Produkt bearbeiten -->
-      @if (editingProduct) {
-        <div class="edit-product-form">
-          <h3>Produkt bearbeiten</h3>
-          <form (ngSubmit)="onUpdateProduct()">
-            <div class="form-group">
-              <label for="edit-title">Name</label>
-              <input type="text" id="edit-title" [(ngModel)]="editingProduct.title" name="title" required>
+          <div class="form-group">
+            <label for="description">Beschreibung</label>
+            <textarea 
+              id="description" 
+              [(ngModel)]="newProduct.description" 
+              name="description" 
+              required
+              placeholder="Beschreiben Sie das Produkt..."
+            ></textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="image">Produktbilder</label>
+            <div class="file-upload">
+              <input 
+                type="file" 
+                id="image" 
+                (change)="onFileSelected($event)" 
+                accept="image/*"
+                class="file-input"
+                multiple
+              >
+              <div class="upload-placeholder" [class.has-images]="imagePreviews.length > 0">
+                <span class="material-icons">cloud_upload</span>
+                <p>Klicken Sie hier oder ziehen Sie Bilder hierher</p>
+              </div>
+              
+              <div class="image-previews" *ngIf="imagePreviews.length > 0">
+                @for (preview of imagePreviews; track preview.url; let i = $index) {
+                  <div class="preview-item">
+                    <img [src]="preview.url" [alt]="'Preview ' + (i + 1)">
+                    <button type="button" class="remove-image" (click)="removeImage(i)">
+                      <span class="material-icons">close</span>
+                    </button>
+                    <div class="image-number">{{ i + 1 }}</div>
+                  </div>
+                }
+              </div>
             </div>
-            <div class="form-group">
-              <label for="edit-description">Beschreibung</label>
-              <textarea id="edit-description" [(ngModel)]="editingProduct.description" name="description" required></textarea>
-            </div>
-            <div class="form-group">
-              <label for="edit-price">Preis</label>
-              <input type="number" id="edit-price" [(ngModel)]="editingProduct.price" name="price" step="0.01" required>
-            </div>
-            <div class="form-group">
-              <label for="edit-image">Neues Bild (optional)</label>
-              <input type="file" id="edit-image" (change)="onFileSelected($event)" accept="image/*">
-            </div>
-            <div class="button-group">
-              <button type="submit">Speichern</button>
-              <button type="button" class="cancel-btn" (click)="cancelEditing()">Abbrechen</button>
-            </div>
-          </form>
-        </div>
-      }
+          </div>
+
+          <div class="button-group">
+            <button type="button" class="cancel-btn">Abbrechen</button>
+            <button 
+              type="submit" 
+              class="submit-btn"
+              [disabled]="!newProduct.title || !newProduct.description || !newProduct.category || newProduct.price <= 0 || imagePreviews.length === 0"
+            >
+              Produkt hinzufügen
+            </button>
+          </div>
+        </form>
+      </div>
 
       <!-- Produktliste -->
       <div class="products-list">
@@ -106,8 +152,14 @@
                 <p>{{ product.description }}</p>
                 <p class="price">{{ product.price | chf }}</p>
                 <div class="actions">
-                  <button (click)="startEditing(product)">Bearbeiten</button>
-                  <button class="delete-btn" (click)="onDeleteProduct(product.id)">Löschen</button>
+                  <button (click)="startEditing(product)" class="edit-btn">
+                    <span class="material-icons">edit</span>
+                    Bearbeiten
+                  </button>
+                  <button class="delete-btn" (click)="onDeleteProduct(product.id)">
+                    <span class="material-icons">delete</span>
+                    Löschen
+                  </button>
                 </div>
               </div>
             </div>

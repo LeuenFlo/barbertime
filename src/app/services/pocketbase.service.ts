@@ -27,41 +27,35 @@ export interface AdminCredentials {
 })
 export class PocketBaseService {
   private pb: PocketBase;
-  private isAdminLoggedIn = new BehaviorSubject<boolean>(false);
-  isAdminLoggedIn$ = this.isAdminLoggedIn.asObservable();
+  private isUserLoggedIn = new BehaviorSubject<boolean>(false);
+  isUserLoggedIn$ = this.isUserLoggedIn.asObservable();
 
   constructor() {
     this.pb = new PocketBase(environment.pocketbaseUrl);
-    this.checkAdminSession();
+    this.isUserLoggedIn.next(this.pb.authStore.isValid);
   }
 
-  private async checkAdminSession() {
-    const isValid = this.pb.authStore.isValid;
-    this.isAdminLoggedIn.next(isValid);
-  }
-
-  // Admin Authentication
-  async adminLogin(credentials: AdminCredentials): Promise<boolean> {
+  // User Authentication
+  async userLogin(credentials: AdminCredentials): Promise<boolean> {
     try {
-      await this.pb.admins.authWithPassword(credentials.email, credentials.password);
-      this.isAdminLoggedIn.next(true);
+      await this.pb.collection('users').authWithPassword(credentials.email, credentials.password);
+      this.isUserLoggedIn.next(true);
       return true;
     } catch (error) {
       console.error('Login error:', error);
-      this.isAdminLoggedIn.next(false);
       return false;
     }
   }
 
-  async adminLogout(): Promise<void> {
+  async userLogout(): Promise<void> {
     this.pb.authStore.clear();
-    this.isAdminLoggedIn.next(false);
+    this.isUserLoggedIn.next(false);
   }
 
   // Product Management
   getProducts(page: number = 1, perPage: number = 12): Observable<{items: Product[], totalItems: number, totalPages: number}> {
     return from(
-      this.pb.collection('products').getList(page, perPage, {
+      this.pb.collection('barbertime_products').getList(page, perPage, {
         sort: '-created'
       })
     ).pipe(
@@ -78,7 +72,7 @@ export class PocketBaseService {
 
   getProduct(id: string): Observable<Product> {
     return from(
-      this.pb.collection('products').getOne(id)
+      this.pb.collection('barbertime_products').getOne(id)
     ).pipe(
       map(record => ({
         ...record,
@@ -89,7 +83,7 @@ export class PocketBaseService {
 
   getProductsByCategory(category: string, page: number = 1, perPage: number = 12): Observable<{items: Product[], totalItems: number, totalPages: number}> {
     return from(
-      this.pb.collection('products').getList(page, perPage, {
+      this.pb.collection('barbertime_products').getList(page, perPage, {
         filter: `category = "${category}"`,
         sort: '-created'
       })
@@ -107,7 +101,7 @@ export class PocketBaseService {
 
   searchProducts(term: string, page: number = 1, perPage: number = 12): Observable<{items: Product[], totalItems: number, totalPages: number}> {
     return from(
-      this.pb.collection('products').getList(page, perPage, {
+      this.pb.collection('barbertime_products').getList(page, perPage, {
         filter: `title ~ "${term}" || description ~ "${term}"`,
         sort: '-created'
       })
@@ -124,37 +118,76 @@ export class PocketBaseService {
   }
 
   // Admin Product Management
-  async addProduct(product: Omit<Product, 'id' | 'collectionId' | 'collectionName' | 'created' | 'updated'>): Promise<Product> {
-    const record = await this.pb.collection('products').create(product);
-    return {
-      ...record,
-      images: record['images'].map((image: string) => this.getImageUrl(record.id, image))
-    } as Product;
+  async addProduct(product: Omit<Product, 'id' | 'collectionId' | 'collectionName' | 'created' | 'updated'>, files?: File[]): Promise<Product> {
+    try {
+      const formData = new FormData();
+      
+      // Add basic product data
+      formData.append('title', product.title);
+      formData.append('description', product.description);
+      formData.append('price', product.price.toString());
+      formData.append('category', product.category);
+      
+      // Add images if they exist
+      if (files && files.length > 0) {
+        files.forEach(file => {
+          formData.append('images', file);
+        });
+      }
+
+      console.log('Creating product with FormData');
+
+      // Create the record using FormData
+      const record = await this.pb.collection('barbertime_products').create(formData);
+      
+      console.log('Created record:', record);
+
+      // Return the formatted product
+      return {
+        id: record.id,
+        collectionId: record.collectionId,
+        collectionName: record.collectionName,
+        title: record['title'],
+        description: record['description'],
+        price: record['price'],
+        category: record['category'] as Product['category'],
+        created: record['created'],
+        updated: record['updated'],
+        images: record['images'] ? record['images'].map((image: string) => this.getImageUrl(record.id, image)) : []
+      };
+    } catch (error) {
+      console.error('Error creating product:', error);
+      throw error;
+    }
   }
 
-  async updateProduct(id: string, product: Partial<Product>): Promise<Product> {
-    const record = await this.pb.collection('products').update(id, product);
+  async updateProduct(id: string, product: Partial<Product>, files?: File[]): Promise<Product> {
+    const formData = new FormData();
+    
+    if (product.title) formData.append('title', product.title);
+    if (product.description) formData.append('description', product.description);
+    if (product.price) formData.append('price', product.price.toString());
+    if (product.category) formData.append('category', product.category);
+    
+    if (files) {
+      files.forEach(file => {
+        formData.append('images', file);
+      });
+    }
+
+    const record = await this.pb.collection('barbertime_products').update(id, formData);
     return {
       ...record,
-      images: record['images'].map((image: string) => this.getImageUrl(record.id, image))
+      images: record['images'] ? record['images'].map((image: string) => this.getImageUrl(record.id, image)) : []
     } as Product;
   }
 
   async deleteProduct(id: string): Promise<void> {
-    await this.pb.collection('products').delete(id);
-  }
-
-  // Image Upload
-  async uploadProductImage(file: File): Promise<string> {
-    const formData = new FormData();
-    formData.append('image', file);
-
-    const record = await this.pb.collection('products').create(formData);
-    return this.getImageUrl(record.id, record['image']);
+    await this.pb.collection('barbertime_products').delete(id);
   }
 
   // Helper method to get full image URL
   private getImageUrl(recordId: string, filename: string): string {
-    return `${environment.pocketbaseUrl}/api/files/products/${recordId}/${filename}`;
+    return `${environment.pocketbaseUrl}/api/files/barbertime_products/${recordId}/${filename}`;
   }
 } 

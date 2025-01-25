@@ -1,4 +1,9 @@
-@if (product) {
+@if (showLoading) {
+    <div class="loading-container">
+        <div class="loading-spinner"></div>
+        <p>Produkt wird geladen...</p>
+    </div>
+} @else if (product) {
   <div class="product-page">
     <div class="back-button">
       <a routerLink="/shop" class="back-link">
@@ -48,10 +53,5 @@
         </p>
       </div>
     </div>
-  </div>
-} @else {
-  <div class="loading">
-    <span class="material-icons">hourglass_empty</span>
-    <p>Produkt wird geladen...</p>
   </div>
 } 

@@ -20,7 +20,7 @@
     </div>
 
     <div class="categories">
-        <button class="category-btn" [class.active]="selectedCategory === 'all'" (click)="filterProducts('all')">Alle</button>
+        <button class="category-btn" [class.active]="selectedCategory === null" (click)="filterProducts(null)">Alle</button>
         <button class="category-btn" [class.active]="selectedCategory === 'tools'" (click)="filterProducts('tools')">Werkzeuge</button>
         <button class="category-btn" [class.active]="selectedCategory === 'beard'" (click)="filterProducts('beard')">Bartpflege</button>
         <button class="category-btn" [class.active]="selectedCategory === 'hair'" (click)="filterProducts('hair')">Haarpflege</button>

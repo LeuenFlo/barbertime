@@ -4,6 +4,11 @@ import { FormsModule } from '@angular/forms';
 import { PocketBaseService, Product, AdminCredentials } from '../../services/pocketbase.service';
 import { ChfPipe } from '../../shared/pipes/chf.pipe';
 
+interface ImagePreview {
+  url: string;
+  file: File;
+}
+
 @Component({
   selector: 'app-admin',
   standalone: true,
@@ -21,12 +26,13 @@ export class AdminComponent implements OnInit {
     images: [],
     category: 'tools'
   };
-  selectedFile: File | null = null;
+  selectedFiles: File[] = [];
+  imagePreviews: ImagePreview[] = [];
   editingProduct: Product | null = null;
   isLoggedIn$;
 
   constructor(private pocketBaseService: PocketBaseService) {
-    this.isLoggedIn$ = this.pocketBaseService.isAdminLoggedIn$;
+    this.isLoggedIn$ = this.pocketBaseService.isUserLoggedIn$;
   }
 
   ngOnInit() {
@@ -35,7 +41,7 @@ export class AdminComponent implements OnInit {
 
   async onLogin() {
     try {
-      const success = await this.pocketBaseService.adminLogin(this.credentials);
+      const success = await this.pocketBaseService.userLogin(this.credentials);
       if (success) {
         this.credentials = { email: '', password: '' };
       } else {
@@ -49,7 +55,7 @@ export class AdminComponent implements OnInit {
 
   async onLogout() {
     try {
-      await this.pocketBaseService.adminLogout();
+      await this.pocketBaseService.userLogout();
     } catch (error) {
       console.error('Logout error:', error);
     }
@@ -64,24 +70,65 @@ export class AdminComponent implements OnInit {
 
   onFileSelected(event: Event) {
     const input = event.target as HTMLInputElement;
-    if (input.files?.length) {
-      this.selectedFile = input.files[0];
+    if (input.files) {
+      const files = Array.from(input.files);
+      this.selectedFiles = [...this.selectedFiles, ...files];
+      
+      files.forEach(file => {
+        const reader = new FileReader();
+        reader.onload = (e: any) => {
+          this.imagePreviews.push({
+            url: e.target.result,
+            file: file
+          });
+        };
+        reader.readAsDataURL(file);
+      });
     }
+  }
+
+  removeImage(index: number) {
+    this.imagePreviews.splice(index, 1);
+    this.selectedFiles.splice(index, 1);
   }
 
   async onAddProduct() {
     try {
-      if (this.selectedFile) {
-        const imageUrl = await this.pocketBaseService.uploadProductImage(this.selectedFile);
-        this.newProduct.images = [imageUrl];
+      // Validate form
+      if (!this.newProduct.title || 
+          !this.newProduct.description || 
+          !this.newProduct.category || 
+          this.newProduct.price <= 0 || 
+          this.selectedFiles.length === 0) {
+        return;
       }
 
-      await this.pocketBaseService.addProduct(this.newProduct);
+      console.log('Attempting to create product with:', {
+        product: this.newProduct,
+        files: this.selectedFiles
+      });
+
+      // Create product with images
+      const product = await this.pocketBaseService.addProduct(
+        {
+          ...this.newProduct,
+          images: [] // Clear images array as we'll pass files separately
+        }, 
+        this.selectedFiles
+      );
+      
+      console.log('Created product:', product);
+
+      // Reset form and reload products
       this.resetForm();
       this.loadProducts();
     } catch (error) {
       console.error('Error adding product:', error);
-      alert('Fehler beim Hinzufügen des Produkts');
+      if (error instanceof Error) {
+        alert(`Fehler beim Hinzufügen des Produkts: ${error.message}`);
+      } else {
+        alert('Fehler beim Hinzufügen des Produkts');
+      }
     }
   }
 
@@ -89,14 +136,16 @@ export class AdminComponent implements OnInit {
     if (!this.editingProduct) return;
 
     try {
-      if (this.selectedFile) {
-        const imageUrl = await this.pocketBaseService.uploadProductImage(this.selectedFile);
-        this.editingProduct.images = [imageUrl];
-      }
-
-      await this.pocketBaseService.updateProduct(this.editingProduct.id, this.editingProduct);
+      const product = await this.pocketBaseService.updateProduct(
+        this.editingProduct.id, 
+        this.editingProduct,
+        this.selectedFiles.length > 0 ? this.selectedFiles : undefined
+      );
+      console.log('Updated product:', product);
+      
       this.editingProduct = null;
-      this.selectedFile = null;
+      this.selectedFiles = [];
+      this.imagePreviews = [];
       this.loadProducts();
     } catch (error) {
       console.error('Error updating product:', error);
@@ -122,7 +171,8 @@ export class AdminComponent implements OnInit {
 
   cancelEditing() {
     this.editingProduct = null;
-    this.selectedFile = null;
+    this.selectedFiles = [];
+    this.imagePreviews = [];
   }
 
   private resetForm() {
@@ -133,6 +183,7 @@ export class AdminComponent implements OnInit {
       images: [],
       category: 'tools'
     };
-    this.selectedFile = null;
+    this.selectedFiles = [];
+    this.imagePreviews = [];
   }
 }

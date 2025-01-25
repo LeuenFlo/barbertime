@@ -1,4 +1,4 @@
 export const environment = {
-  production: true,
-  pocketbaseUrl: 'http://217.160.252.61:80'
+  production: false,
+  pocketbaseUrl: 'https://floapi.ch'
 };

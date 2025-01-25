@@ -193,3 +193,16 @@ $mobile-breakpoint: 768px;
     }
   }
 }
+
+.admin-btn {
+  background-color: var(--dark-gray);
+  color: white;
+  
+  &:hover {
+    background-color: color.adjust(#333, $lightness: 10%);
+  }
+
+  i {
+    color: white;
+  }
+}
