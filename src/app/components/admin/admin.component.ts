@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Observable } from 'rxjs';
 import { PocketBaseService, Product } from '../../services/pocketbase.service';
+import { Router } from '@angular/router';
 
 interface ImagePreview {
   url: string;
@@ -34,17 +35,68 @@ export class AdminComponent {
   selectedFiles: File[] = [];
   imagePreviews: ImagePreview[] = [];
   error: string | null = null;
+  isLoading = false;
+  productMessage: { type: 'success' | 'error', text: string } | null = null;
 
-  constructor(private pocketBaseService: PocketBaseService) {
+  constructor(
+    private pocketBaseService: PocketBaseService,
+    private router: Router
+  ) {
     this.isLoggedIn$ = this.pocketBaseService.isUserLoggedIn$;
   }
 
   async onLogin() {
+    // Validierung der Eingabefelder
+    if (!this.credentials.email && !this.credentials.password) {
+      this.error = 'Bitte geben Sie Ihre Email und Ihr Passwort ein';
+      return;
+    }
+    if (!this.credentials.email) {
+      this.error = 'Bitte geben Sie Ihre Email-Adresse ein';
+      return;
+    }
+    if (!this.credentials.password) {
+      this.error = 'Bitte geben Sie Ihr Passwort ein';
+      return;
+    }
+
+    // Email-Format überprüfen
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(this.credentials.email)) {
+      this.error = 'Bitte geben Sie eine gültige Email-Adresse ein';
+      return;
+    }
+
+    this.isLoading = true;
+    this.error = null;
+
     try {
       await this.pocketBaseService.userLogin(this.credentials);
-      this.error = null;
-    } catch (error) {
-      this.error = 'Ungültige Anmeldedaten';
+    } catch (error: any) {
+      console.error('Login error:', error);
+      
+      // Spezifische Fehlerbehandlung für verschiedene Fehlertypen
+      if (error.message === 'Ungültige Anmeldedaten') {
+        this.error = 'Ungültige Email oder Passwort';
+      } else if (error.status === 401 || error.status === 403) {
+        this.error = 'Sie haben keine Berechtigung für diesen Bereich';
+      } else if (error.status === 0 || error.message?.includes('Failed to fetch')) {
+        this.error = 'Verbindungsfehler. Bitte überprüfen Sie Ihre Internetverbindung';
+      } else if (error.data?.message) {
+        // Spezifische Fehlermeldung vom Server
+        this.error = error.data.message;
+      } else if (error.message) {
+        // Allgemeine Fehlermeldung
+        this.error = error.message;
+      } else {
+        this.error = 'Ein unerwarteter Fehler ist aufgetreten. Bitte versuchen Sie es später erneut';
+      }
+    } finally {
+      this.isLoading = false;
+      if (this.error) {
+        // Formular zurücksetzen bei Fehler
+        this.credentials.password = '';
+      }
     }
   }
 
@@ -84,8 +136,14 @@ export class AdminComponent {
           !this.newProduct.category || 
           this.newProduct.price <= 0 || 
           this.selectedFiles.length === 0) {
+        this.productMessage = {
+          type: 'error',
+          text: 'Bitte füllen Sie alle Felder aus und fügen Sie mindestens ein Bild hinzu'
+        };
         return;
       }
+
+      this.productMessage = null;
 
       // Create product with images
       await this.pocketBaseService.addProduct(
@@ -96,15 +154,20 @@ export class AdminComponent {
         this.selectedFiles
       );
 
+      // Show success message
+      this.productMessage = {
+        type: 'success',
+        text: 'Produkt wurde erfolgreich erstellt'
+      };
+
       // Reset form
       this.resetForm();
     } catch (error) {
       console.error('Error adding product:', error);
-      if (error instanceof Error) {
-        alert(`Fehler beim Hinzufügen des Produkts: ${error.message}`);
-      } else {
-        alert('Fehler beim Hinzufügen des Produkts');
-      }
+      this.productMessage = {
+        type: 'error',
+        text: error instanceof Error ? error.message : 'Fehler beim Erstellen des Produkts'
+      };
     }
   }
 
@@ -118,5 +181,6 @@ export class AdminComponent {
     };
     this.selectedFiles = [];
     this.imagePreviews = [];
+    // Don't reset the success message when clearing the form
   }
 }

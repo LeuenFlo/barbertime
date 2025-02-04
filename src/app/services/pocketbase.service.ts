@@ -38,12 +38,18 @@ export class PocketBaseService {
   // Admin Authentication
   async userLogin(credentials: AdminCredentials): Promise<boolean> {
     try {
-      await this.pb.collection('_superusers').authWithPassword(credentials.email, credentials.password);
+      await this.pb.collection('users').authWithPassword(
+        credentials.email,
+        credentials.password
+      );
       this.isUserLoggedIn.next(true);
       return true;
-    } catch (error) {
-      console.error('Login error:', error);
-      return false;
+    } catch (error: any) {
+      // Fehler in benutzerfreundliche Meldung umwandeln
+      if (error.status === 400) {
+        throw new Error('Ungültige Anmeldedaten');
+      }
+      throw error;
     }
   }
 
