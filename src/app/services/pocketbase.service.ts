@@ -35,10 +35,10 @@ export class PocketBaseService {
     this.isUserLoggedIn.next(this.pb.authStore.isValid);
   }
 
-  // User Authentication
+  // Admin Authentication
   async userLogin(credentials: AdminCredentials): Promise<boolean> {
     try {
-      await this.pb.collection('users').authWithPassword(credentials.email, credentials.password);
+      await this.pb.collection('_superusers').authWithPassword(credentials.email, credentials.password);
       this.isUserLoggedIn.next(true);
       return true;
     } catch (error) {
