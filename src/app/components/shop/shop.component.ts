@@ -4,7 +4,7 @@ import { ChfPipe } from '../../shared/pipes/chf.pipe';
 import { TruncatePipe } from '../../shared/pipes/truncate.pipe';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { Subject, Subscription } from 'rxjs';
+import { Subject, Subscription, Observable } from 'rxjs';
 import { debounceTime, distinctUntilChanged, switchMap, map } from 'rxjs/operators';
 import { PocketBaseService, Product } from '../../services/pocketbase.service';
 
@@ -25,6 +25,7 @@ export class ShopComponent implements OnInit, OnDestroy {
   totalItems = 0;
   itemsPerPage = 12;
   isLoading = false;
+  isUserLoggedIn$: Observable<boolean>;
   private searchSubject = new Subject<string>();
   private subscriptions: Subscription[] = [];
 
@@ -38,6 +39,8 @@ export class ShopComponent implements OnInit, OnDestroy {
   constructor(
     private pocketBaseService: PocketBaseService
   ) {
+    this.isUserLoggedIn$ = this.pocketBaseService.isUserLoggedIn$;
+    
     const searchSubscription = this.searchSubject.pipe(
       debounceTime(300),
       distinctUntilChanged(),
@@ -122,5 +125,17 @@ export class ShopComponent implements OnInit, OnDestroy {
   loadPage(page: number): void {
     this.currentPage = page;
     this.loadProducts();
+  }
+
+  async deleteProduct(id: string) {
+    if (confirm('Möchten Sie dieses Produkt wirklich löschen?')) {
+      try {
+        await this.pocketBaseService.deleteProduct(id);
+        this.loadProducts(); // Reload products after deletion
+      } catch (error) {
+        console.error('Error deleting product:', error);
+        alert('Fehler beim Löschen des Produkts');
+      }
+    }
   }
 }

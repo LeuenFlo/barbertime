@@ -195,14 +195,19 @@ $mobile-breakpoint: 768px;
 }
 
 .admin-btn {
-  background-color: var(--dark-gray);
-  color: white;
+  color: $text-color;
+  border: 1px solid #e0e0e0;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  background: white;
   
   &:hover {
-    background-color: color.adjust(#333, $lightness: 10%);
+    color: white;
+    border-color: $primary-color;
   }
 
-  i {
+  &.active {
     color: white;
   }
 }

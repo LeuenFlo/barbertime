@@ -1,71 +1,55 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { PocketBaseService, Product, AdminCredentials } from '../../services/pocketbase.service';
-import { ChfPipe } from '../../shared/pipes/chf.pipe';
+import { Observable } from 'rxjs';
+import { PocketBaseService, Product } from '../../services/pocketbase.service';
 
 interface ImagePreview {
   url: string;
   file: File;
 }
 
+type ProductCategory = 'tools' | 'beard' | 'hair' | 'styling';
+
 @Component({
   selector: 'app-admin',
   standalone: true,
-  imports: [CommonModule, FormsModule, ChfPipe],
+  imports: [CommonModule, FormsModule],
   templateUrl: './admin.component.html',
   styleUrls: ['./admin.component.scss']
 })
-export class AdminComponent implements OnInit {
-  products: Product[] = [];
-  credentials: AdminCredentials = { email: '', password: '' };
+export class AdminComponent {
+  isLoggedIn$: Observable<boolean>;
+  credentials = {
+    email: '',
+    password: ''
+  };
   newProduct: Omit<Product, 'id' | 'collectionId' | 'collectionName' | 'created' | 'updated'> = {
     title: '',
     description: '',
     price: 0,
     images: [],
-    category: 'tools'
+    category: 'tools' as ProductCategory
   };
   selectedFiles: File[] = [];
   imagePreviews: ImagePreview[] = [];
-  editingProduct: Product | null = null;
-  isLoggedIn$;
+  error: string | null = null;
 
   constructor(private pocketBaseService: PocketBaseService) {
     this.isLoggedIn$ = this.pocketBaseService.isUserLoggedIn$;
   }
 
-  ngOnInit() {
-    this.loadProducts();
-  }
-
   async onLogin() {
     try {
-      const success = await this.pocketBaseService.userLogin(this.credentials);
-      if (success) {
-        this.credentials = { email: '', password: '' };
-      } else {
-        alert('Login fehlgeschlagen');
-      }
+      await this.pocketBaseService.userLogin(this.credentials);
+      this.error = null;
     } catch (error) {
-      console.error('Login error:', error);
-      alert('Login fehlgeschlagen');
+      this.error = 'Ungültige Anmeldedaten';
     }
   }
 
-  async onLogout() {
-    try {
-      await this.pocketBaseService.userLogout();
-    } catch (error) {
-      console.error('Logout error:', error);
-    }
-  }
-
-  private loadProducts() {
-    this.pocketBaseService.getProducts(1, 100)  // Load more products per page for admin view
-      .subscribe(response => {
-        this.products = response.items;
-      });
+  onLogout() {
+    this.pocketBaseService.userLogout();
   }
 
   onFileSelected(event: Event) {
@@ -103,25 +87,17 @@ export class AdminComponent implements OnInit {
         return;
       }
 
-      console.log('Attempting to create product with:', {
-        product: this.newProduct,
-        files: this.selectedFiles
-      });
-
       // Create product with images
-      const product = await this.pocketBaseService.addProduct(
+      await this.pocketBaseService.addProduct(
         {
           ...this.newProduct,
           images: [] // Clear images array as we'll pass files separately
         }, 
         this.selectedFiles
       );
-      
-      console.log('Created product:', product);
 
-      // Reset form and reload products
+      // Reset form
       this.resetForm();
-      this.loadProducts();
     } catch (error) {
       console.error('Error adding product:', error);
       if (error instanceof Error) {
@@ -132,56 +108,13 @@ export class AdminComponent implements OnInit {
     }
   }
 
-  async onUpdateProduct() {
-    if (!this.editingProduct) return;
-
-    try {
-      const product = await this.pocketBaseService.updateProduct(
-        this.editingProduct.id, 
-        this.editingProduct,
-        this.selectedFiles.length > 0 ? this.selectedFiles : undefined
-      );
-      console.log('Updated product:', product);
-      
-      this.editingProduct = null;
-      this.selectedFiles = [];
-      this.imagePreviews = [];
-      this.loadProducts();
-    } catch (error) {
-      console.error('Error updating product:', error);
-      alert('Fehler beim Aktualisieren des Produkts');
-    }
-  }
-
-  async onDeleteProduct(id: string) {
-    if (!confirm('Möchten Sie dieses Produkt wirklich löschen?')) return;
-
-    try {
-      await this.pocketBaseService.deleteProduct(id);
-      this.loadProducts();
-    } catch (error) {
-      console.error('Error deleting product:', error);
-      alert('Fehler beim Löschen des Produkts');
-    }
-  }
-
-  startEditing(product: Product) {
-    this.editingProduct = { ...product };
-  }
-
-  cancelEditing() {
-    this.editingProduct = null;
-    this.selectedFiles = [];
-    this.imagePreviews = [];
-  }
-
-  private resetForm() {
+  resetForm() {
     this.newProduct = {
       title: '',
       description: '',
       price: 0,
       images: [],
-      category: 'tools'
+      category: 'tools' as ProductCategory
     };
     this.selectedFiles = [];
     this.imagePreviews = [];
